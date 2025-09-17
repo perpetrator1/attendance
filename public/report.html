@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Attendance Report</title>
+</head>
+<body>
+  <h1>Attendance Report</h1>
+  <table border="1" id="reportTable">
+    <tr><th>Name</th><th>Roll</th><th>Present</th><th>Total</th><th>%</th></tr>
+  </table>
+  <br>
+  <a href="index.html">Back to Marking</a>
+
+  <script>
+    async function loadReport() {
+      const res = await fetch('/api/report');
+      const rows = await res.json();
+      const table = document.getElementById('reportTable');
+      rows.forEach(r => {
+        const tr = `<tr><td>${r.name}</td><td>${r.roll}</td><td>${r.present || 0}</td><td>${r.total || 0}</td><td>${r.percentage || 0}%</td></tr>`;
+        table.innerHTML += tr;
+      });
+    }
+    loadReport();
+  </script>
+</body>
+</html>

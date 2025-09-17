@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Mark Attendance</title>
+</head>
+<body>
+  <h1>Attendance Manager — Mark Attendance</h1>
+
+  <label>Course: <input type="text" id="course" value="CSL333"></label><br>
+  <label>Date: <input type="date" id="date" required></label><br><br>
+
+  <div id="students"></div>
+
+  <button id="submitBtn">Submit Attendance</button>
+  <div id="msg" style="color:green;margin-top:10px"></div>
+
+  <hr>
+  <a href="report.html">Go to Reports</a>
+
+  <script>
+    document.getElementById('date').value = new Date().toISOString().slice(0,10);
+
+    async function loadStudents() {
+      const res = await fetch('/api/students');
+      const arr = await res.json();
+      const div = document.getElementById('students');
+      div.innerHTML = '';
+      arr.forEach(s => {
+        div.innerHTML += `<label><input type="checkbox" data-id="${s.id}" class="chk" checked> ${s.name} (${s.roll})</label><br>`;
+      });
+    }
+
+    document.getElementById('submitBtn').addEventListener('click', async () => {
+      const course = document.getElementById('course').value;
+      const session_date = document.getElementById('date').value;
+      const checks = Array.from(document.querySelectorAll('.chk'));
+      const records = checks.map(ch => ({ student_id: parseInt(ch.dataset.id), status: ch.checked ? 'Present' : 'Absent' }));
+      const res = await fetch('/api/attendance', {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({ course, session_date, records })
+      });
+      const j = await res.json();
+      document.getElementById('msg').textContent = j.ok ? 'Saved ✓' : 'Error';
+    });
+
+    loadStudents();
+  </script>
+</body>
+</html>
